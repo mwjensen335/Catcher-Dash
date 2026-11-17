@@ -1,0 +1,1148 @@
+<title>Battery Lab Rep Review</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=DM+Mono:wght@400;500&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,700&display=swap">
+<style>
+/* Layout: navy rail (matches the Battery Lab dashboard) + one working view per tool; video stage is always dark like a film room */
+:root{
+  --bg:#edf2f6; --surface:#ffffff; --surface-2:#f4f7fa; --ink:#111a24; --muted:#5a6a7b; --line:#d7e0e8;
+  --nav:#141d28; --nav-ink:#c3d0dc; --nav-active:#bfe0f5; --nav-active-ink:#0f1a25;
+  --accent:#2c7bb3; --accent-ink:#ffffff; --accent-soft:#d6eaf7;
+  --good:#23824c; --bad:#c0410f; --warn:#a86a12; --heat:#2c7bb3;
+  --display:"Barlow Condensed","Arial Narrow",Arial,sans-serif;
+  --body:"DM Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --mono:"DM Mono",ui-monospace,Consolas,monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#0d131a; --surface:#151e28; --surface-2:#1a2531; --ink:#e6edf4; --muted:#93a3b4; --line:#253342;
+  --nav:#090e14; --nav-ink:#b3c1ce; --nav-active:#244761; --nav-active-ink:#e6f3fc;
+  --accent:#78bde9; --accent-ink:#0b1622; --accent-soft:#1c3950;
+  --good:#5cc98c; --bad:#f2895b; --warn:#e2b04f; --heat:#78bde9; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0d131a; --surface:#151e28; --surface-2:#1a2531; --ink:#e6edf4; --muted:#93a3b4; --line:#253342;
+  --nav:#090e14; --nav-ink:#b3c1ce; --nav-active:#244761; --nav-active-ink:#e6f3fc;
+  --accent:#78bde9; --accent-ink:#0b1622; --accent-soft:#1c3950;
+  --good:#5cc98c; --bad:#f2895b; --warn:#e2b04f; --heat:#78bde9; color-scheme:dark}
+
+*{box-sizing:border-box}
+html,body{min-height:100%}
+body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:14px;line-height:1.45}
+button,input,select{font:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+h1,h2,h3{font-family:var(--display);font-weight:700;letter-spacing:.01em;text-wrap:balance;margin:0;line-height:1.05}
+.eyebrow{font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+.num{font-variant-numeric:tabular-nums}
+
+.app{display:grid;grid-template-columns:216px minmax(0,1fr);min-height:100vh}
+.rail{background:var(--nav);color:var(--nav-ink);padding:20px 14px;display:flex;flex-direction:column;gap:22px;position:sticky;top:0;height:100vh}
+.brand{display:flex;align-items:center;gap:10px;padding:0 6px}
+.brand-mark{width:32px;height:32px;border-radius:8px;background:var(--nav-active);display:grid;place-items:center;flex:none}
+.brand-mark svg{width:20px;height:20px}
+.brand b{font-family:var(--display);font-size:19px;letter-spacing:.04em;color:#fff;display:block;line-height:1}
+.brand small{font-family:var(--mono);font-size:9px;letter-spacing:.14em;opacity:.7}
+.nav{display:flex;flex-direction:column;gap:3px}
+.nav .eyebrow{color:var(--nav-ink);opacity:.6;padding:0 8px 6px}
+.nav a{display:flex;align-items:center;gap:10px;padding:9px 10px;border-radius:7px;color:var(--nav-ink);text-decoration:none;font-size:13.5px}
+.nav a:hover{background:rgba(255,255,255,.06)}
+.nav a[aria-current="page"]{background:var(--nav-active);color:var(--nav-active-ink);font-weight:500}
+.nav a svg{width:16px;height:16px;flex:none}
+.rail-foot{margin-top:auto;border:1px solid rgba(255,255,255,.1);border-radius:10px;padding:12px;font-size:12px}
+.rail-foot .eyebrow{color:var(--nav-ink);opacity:.6;font-size:9px}
+
+main{min-width:0;padding-block:22px 40px;padding-left:max(24px,env(safe-area-inset-left,0px));padding-right:max(24px,env(safe-area-inset-right,0px))}
+.view-head{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:12px 24px;margin-bottom:18px}
+.view-head h1{font-size:clamp(28px,3.4vw,38px)}
+.view-head p{margin:6px 0 0;color:var(--muted);max-width:62ch}
+.mock{font-family:var(--mono);font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;padding:5px 9px;border-radius:999px;border:1px dashed var(--line);color:var(--muted);white-space:nowrap}
+
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:16px;min-width:0}
+.panel h2{font-size:20px}
+.panel-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:12px}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;border:1px solid var(--line);background:var(--surface);border-radius:8px;padding:7px 11px;font-size:13px;font-weight:500;min-height:34px}
+.btn:hover{border-color:var(--accent)}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.btn.sm{padding:4px 8px;min-height:28px;font-size:12px}
+.btn[disabled]{opacity:.45;cursor:not-allowed}
+.btn svg{width:15px;height:15px}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:8px;overflow:hidden;background:var(--surface)}
+.seg button{border:0;background:none;padding:6px 10px;font-size:12.5px;min-height:32px}
+.seg button+button{border-left:1px solid var(--line)}
+.seg button[aria-pressed="true"]{background:var(--accent-soft);color:var(--ink);font-weight:600}
+.field{display:flex;flex-direction:column;gap:4px;min-width:0}
+.field label{font-family:var(--mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+.field input,.field select,.input{border:1px solid var(--line);background:var(--surface-2);border-radius:7px;padding:7px 9px;min-height:34px;width:100%}
+.chip{display:inline-flex;align-items:center;gap:5px;font-family:var(--mono);font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;padding:2px 7px;border-radius:999px;border:1px solid currentColor;white-space:nowrap}
+.chip.good{color:var(--good)} .chip.fix{color:var(--bad)} .chip.note{color:var(--muted)} .chip.voice{color:var(--accent)}
+
+/* ---------- Rep Review ---------- */
+.review{display:grid;grid-template-columns:250px minmax(0,1fr) 330px;gap:16px;align-items:start}
+.clips{display:flex;flex-direction:column;gap:12px}
+.clip-list{display:flex;flex-direction:column;gap:6px;max-height:420px;overflow:auto}
+.clip{all:unset;box-sizing:border-box;display:grid;grid-template-columns:44px minmax(0,1fr);gap:10px;padding:8px;border-radius:9px;cursor:pointer;border:1px solid transparent}
+.clip:hover{background:var(--surface-2)}
+.clip[aria-current="true"]{background:var(--accent-soft);border-color:var(--accent)}
+.clip:focus-visible{outline:2px solid var(--accent)}
+.thumb{width:44px;height:44px;border-radius:7px;background:#0b1118;display:grid;place-items:center;color:#9cc9e8}
+.thumb svg{width:16px;height:16px}
+.clip b{display:block;font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.clip span{display:block;font-size:11.5px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.upload-form{display:grid;grid-template-columns:1fr 1fr;gap:8px;border-top:1px solid var(--line);padding-top:12px}
+.upload-form .full{grid-column:1/-1}
+.filebtn{position:relative;overflow:hidden}
+.filebtn input{position:absolute;inset:0;opacity:0;cursor:pointer}
+
+.stage-wrap{display:flex;flex-direction:column;gap:10px;min-width:0}
+.stage-meta{display:flex;flex-wrap:wrap;align-items:center;gap:8px 12px}
+.stage-meta h2{font-size:24px}
+.stage{position:relative;width:100%;max-width:100%;aspect-ratio:16/9;background:#0b1118;border-radius:12px;overflow:hidden;touch-action:none}
+.stage video,.stage canvas{position:absolute;inset:0;width:100%;height:100%}
+.stage video{object-fit:contain}
+.stage canvas.ink{cursor:crosshair}
+.stage canvas.ink.off{pointer-events:none}
+.caption{position:absolute;left:50%;bottom:14px;transform:translateX(-50%);max-width:86%;background:rgba(8,12,17,.82);color:#f2f6f9;padding:7px 12px;border-radius:8px;font-size:13.5px;display:flex;gap:8px;align-items:baseline;pointer-events:none}
+.caption .chip{flex:none}
+.stage-badge{position:absolute;top:10px;left:10px;font-family:var(--mono);font-size:10.5px;letter-spacing:.1em;color:#cfe3f1;background:rgba(8,12,17,.6);padding:4px 8px;border-radius:6px;pointer-events:none}
+.paused-flag{position:absolute;top:10px;right:10px;font-family:var(--mono);font-size:10.5px;letter-spacing:.08em;color:#11202c;background:#ffd23f;padding:4px 8px;border-radius:6px;pointer-events:none}
+
+.transport{display:flex;flex-wrap:wrap;align-items:center;gap:8px}
+.time{font-family:var(--mono);font-size:13px;min-width:120px}
+.timeline{position:relative;padding-top:14px}
+.markers{position:absolute;left:8px;right:8px;top:0;height:12px}
+.mk{position:absolute;top:0;width:10px;height:10px;margin-left:-5px;border:0;padding:0;border-radius:50%}
+.mk.good{background:var(--good)} .mk.fix{background:var(--bad)} .mk.note,.mk.voice{background:var(--accent)}
+.mk.draw{background:#ffb703;border-radius:2px;transform:rotate(45deg) scale(.85)}
+.mk.time{background:var(--ink);border-radius:2px;width:3px;margin-left:-1.5px;height:12px}
+input[type=range].scrub{width:100%;accent-color:var(--accent)}
+.toolbar{display:flex;flex-wrap:wrap;align-items:center;gap:8px}
+.swatch{width:24px;height:24px;border-radius:50%;border:2px solid var(--surface);box-shadow:0 0 0 1px var(--line);padding:0}
+.swatch[aria-pressed="true"]{box-shadow:0 0 0 2px var(--ink)}
+.check{display:inline-flex;align-items:center;gap:6px;font-size:12.5px;color:var(--muted)}
+.timing{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.timing .stat{background:var(--surface-2);border-radius:9px;padding:10px}
+.stat .k{font-family:var(--mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+.stat .v{font-family:var(--display);font-size:28px;font-weight:700;line-height:1.1;font-variant-numeric:tabular-nums}
+.stat .v small{font-size:15px;color:var(--muted);margin-left:2px}
+
+.feedback{display:flex;flex-direction:column;gap:14px}
+.notes{display:flex;flex-direction:column;gap:2px;max-height:300px;overflow:auto}
+.note{all:unset;box-sizing:border-box;display:grid;grid-template-columns:58px minmax(0,1fr);gap:8px;padding:8px;border-radius:8px;cursor:pointer}
+.note:hover{background:var(--surface-2)}
+.note:focus-visible{outline:2px solid var(--accent)}
+.note .t{font-family:var(--mono);font-size:12px;color:var(--accent)}
+.note p{margin:3px 0 0;font-size:13px}
+.note-add{display:flex;flex-direction:column;gap:8px;border-top:1px solid var(--line);padding-top:12px}
+.row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.live{font-size:12px;color:var(--muted);font-style:italic;min-height:1.2em}
+.rubric{display:flex;flex-direction:column;gap:9px}
+.crit{display:flex;justify-content:space-between;align-items:center;gap:10px}
+.crit span{font-size:13px}
+.dots{display:flex;gap:4px}
+.dots button{width:26px;height:26px;border-radius:6px;border:1px solid var(--line);background:var(--surface-2);font-size:12px;font-family:var(--mono);padding:0}
+.dots button[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.avg{display:flex;align-items:baseline;justify-content:space-between;border-top:1px solid var(--line);padding-top:10px}
+
+/* ---------- Zone + Blocking ---------- */
+.game{display:grid;grid-template-columns:minmax(0,1fr) 340px;gap:16px;align-items:start}
+.zone-card{display:flex;flex-direction:column;gap:12px}
+.zone-svg{width:100%;max-width:520px;max-height:68vh;margin:0 auto;display:block;touch-action:manipulation;cursor:crosshair}
+.zone-svg text{font-family:var(--mono)}
+.callbar{display:flex;flex-wrap:wrap;justify-content:center;gap:10px}
+.callbar .btn{min-width:150px;min-height:44px;font-size:14px}
+.btn.strike{border-color:var(--good);color:var(--good)}
+.btn.ball{border-color:var(--bad);color:var(--bad)}
+.stats{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.stats .stat{background:var(--surface-2);border-radius:9px;padding:10px}
+.legend{display:flex;flex-wrap:wrap;gap:6px 14px;font-size:12px;color:var(--muted);align-items:center}
+.legend i{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:5px;vertical-align:-1px}
+.ramp{display:inline-block;width:90px;height:8px;border-radius:4px;background:linear-gradient(90deg,transparent,var(--heat));border:1px solid var(--line);vertical-align:middle;margin:0 6px}
+.progress{height:8px;border-radius:4px;background:var(--surface-2);overflow:hidden}
+.progress b{display:block;height:100%;background:var(--accent);border-radius:4px}
+.rules{margin:0;padding-left:18px;color:var(--muted);font-size:13px;display:flex;flex-direction:column;gap:4px}
+.rules b{color:var(--ink)}
+.toast{font-size:12.5px;color:var(--good);min-height:1.2em}
+.reps{display:flex;flex-wrap:wrap;gap:4px}
+.rep{width:22px;height:22px;border-radius:5px;display:grid;place-items:center;font-family:var(--mono);font-size:10px;color:#fff}
+
+/* ---------- Catcher overview ---------- */
+.ov-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin-bottom:16px}
+.tile{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:14px;display:flex;flex-direction:column;gap:4px;min-width:0}
+.tile .v{font-family:var(--display);font-size:36px;font-weight:700;line-height:1;font-variant-numeric:tabular-nums}
+.tile .v small{font-size:16px;color:var(--muted)}
+.tile .sub{font-size:12px;color:var(--muted)}
+.tile svg{width:100%;height:40px;margin-top:6px}
+.ov-cols{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+.list{display:flex;flex-direction:column}
+.list > *{padding:10px 0;border-top:1px solid var(--line)}
+.list > *:first-child{border-top:0;padding-top:0}
+.li-sub{font-size:12px;color:var(--muted)}
+.linkbtn{all:unset;cursor:pointer;color:var(--accent);font-weight:500;font-size:13px}
+.linkbtn:focus-visible{outline:2px solid var(--accent)}
+
+/* ---------- Model ---------- */
+.pipe{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin-bottom:16px}
+.step{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:16px;display:flex;flex-direction:column;gap:8px;min-width:0}
+.step h3{font-size:20px}
+.step p{margin:0;color:var(--muted);font-size:13px}
+.step .eyebrow{color:var(--accent)}
+.two{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:12px}
+.prose p{margin:0 0 10px;max-width:68ch}
+.prose ul{margin:0;padding-left:18px;display:flex;flex-direction:column;gap:6px;max-width:68ch}
+
+@media (max-width:1280px){
+  .review{grid-template-columns:240px minmax(0,1fr)}
+  .feedback{grid-column:1/-1;display:grid;grid-template-columns:1fr 1fr;align-items:start}
+}
+@media (max-width:1000px){
+  .game{grid-template-columns:minmax(0,1fr)}
+  .ov-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .ov-cols,.pipe{grid-template-columns:1fr 1fr}
+}
+@media (max-width:860px){
+  .app{grid-template-columns:minmax(0,1fr)}
+  .rail{position:sticky;top:env(safe-area-inset-top,0px);height:auto;flex-direction:row;align-items:center;padding:10px max(16px,env(safe-area-inset-right,0px)) 10px max(16px,env(safe-area-inset-left,0px));gap:14px;z-index:5;overflow-x:auto}
+  body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--nav)}
+  .brand small,.nav .eyebrow,.rail-foot{display:none}
+  .nav{flex-direction:row}
+  .nav a{white-space:nowrap;padding:7px 9px}
+  .review{grid-template-columns:minmax(0,1fr)}
+  .clips{order:2}
+  .feedback{grid-template-columns:minmax(0,1fr)}
+  main{padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+}
+@media (max-width:560px){
+  .ov-cols,.pipe,.two{grid-template-columns:1fr}
+  .timing{grid-template-columns:1fr 1fr 1fr}
+  .stat .v{font-size:22px}
+  .callbar .btn{min-width:0;flex:1}
+}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+.pulse{animation:pulse 1s ease-in-out infinite}
+@keyframes pulse{50%{opacity:.35}}
+</style>
+
+<div class="app">
+  <aside class="rail">
+    <div class="brand">
+      <div class="brand-mark"><svg viewBox="0 0 24 24" fill="none" stroke="#0f1a25" stroke-width="2"><circle cx="12" cy="12" r="8"/><path d="M12 2v5M12 17v5M2 12h5M17 12h5"/></svg></div>
+      <div><b>BATTERY LAB</b><small>CATCHING DEVELOPMENT</small></div>
+    </div>
+    <nav class="nav" aria-label="Sections">
+      <div class="eyebrow">Review</div>
+      <a href="#review" data-view="review"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M10 9l5 3-5 3z"/></svg>Rep Review</a>
+      <a href="#zone" data-view="zone"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="6" y="4" width="12" height="16"/><path d="M10 4v16M14 4v16M6 9.3h12M6 14.6h12"/></svg>Zone Game</a>
+      <a href="#blocking" data-view="blocking"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 18h16M7 18l5-12 5 12"/><circle cx="12" cy="15" r="1.5"/></svg>Blocking Map</a>
+      <a href="#catcher" data-view="catcher"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 21c1-4 4-6 8-6s7 2 8 6"/></svg>Catcher Page</a>
+      <a href="#model" data-view="model"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6h4v4H4zM16 4h4v4h-4zM16 16h4v4h-4zM8 8l8-2M8 8l8 10"/></svg>Strike/Ball Model</a>
+    </nav>
+    <div class="rail-foot"><div class="eyebrow">Prototype</div>Sample data is made up. Videos you load stay in this browser tab.</div>
+  </aside>
+
+  <main>
+    <!-- ================= REP REVIEW ================= -->
+    <section id="v-review" data-v="review">
+      <div class="view-head">
+        <div>
+          <div class="eyebrow">Upload · Telestrate · Talk through it</div>
+          <h1>Rep Review</h1>
+          <p>Catchers and coaches upload drill clips. The coach steps through frame by frame, draws on the rep, and talks or types feedback that is pinned to the exact moment.</p>
+        </div>
+        <span class="mock">Mockup</span>
+      </div>
+
+      <div class="review">
+        <div class="panel clips">
+          <div class="panel-head"><h2>Clips</h2><span class="eyebrow" id="clipCount"></span></div>
+          <div class="clip-list" id="clipList" role="list"></div>
+          <div class="upload-form">
+            <div class="field full"><label for="upCatcher">Catcher</label>
+              <select id="upCatcher"><option>Sample catcher A</option><option>Sample catcher B</option><option>Sample catcher C</option></select></div>
+            <div class="field"><label for="upArea">Skill area</label>
+              <select id="upArea"><option>Receiving</option><option>Blocking</option><option>Throwing</option><option>Game Calling</option></select></div>
+            <div class="field"><label for="upBy">Uploaded by</label>
+              <select id="upBy"><option>Catcher</option><option>Coach</option></select></div>
+            <div class="field full"><label for="upDrill">Drill</label>
+              <input id="upDrill" list="drills" placeholder="e.g. Short-hop blocks" ></div>
+            <datalist id="drills"><option>Short-hop blocks</option><option>10-ball blocking gauntlet</option><option>Low-away framing</option><option>Shadow-zone sticks</option><option>Pop time to 2B</option><option>Exchange reps</option></datalist>
+            <label class="btn primary filebtn full"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 16V4M7 9l5-5 5 5M4 20h16"/></svg>Upload video<input type="file" id="upFile" accept="video/*" aria-label="Upload video"></label>
+          </div>
+        </div>
+
+        <div class="stage-wrap">
+          <div class="stage-meta">
+            <h2 id="clipTitle">—</h2>
+            <span class="chip note" id="clipArea"></span>
+            <span class="li-sub" id="clipWho"></span>
+          </div>
+          <div class="stage" id="stage">
+            <video id="vid" playsinline preload="metadata" hidden></video>
+            <canvas id="demo"></canvas>
+            <canvas id="ink" class="ink off"></canvas>
+            <div class="stage-badge" id="stageBadge">SAMPLE CLIP</div>
+            <div class="paused-flag" id="pausedFlag" hidden>PAUSED ON COACH DRAWING</div>
+            <div class="caption" id="caption" hidden></div>
+          </div>
+
+          <div class="timeline">
+            <div class="markers" id="markers"></div>
+            <input type="range" class="scrub" id="scrub" min="0" max="1" step="0.001" value="0" aria-label="Scrub video">
+          </div>
+
+          <div class="transport">
+            <button class="btn" id="bBack" title="Back one frame (,)" aria-label="Back one frame"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M6 5h2v14H6zM20 5v14L9 12z"/></svg></button>
+            <button class="btn primary" id="bPlay" aria-label="Play" title="Play / pause (space)"><svg viewBox="0 0 24 24" fill="currentColor" id="playIco"><path d="M7 4l13 8-13 8z"/></svg></button>
+            <button class="btn" id="bFwd" title="Forward one frame (.)" aria-label="Forward one frame"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M16 5h2v14h-2zM4 5v14l11-7z"/></svg></button>
+            <span class="time num" id="timeLbl">0:00.00 / 0:00.00</span>
+            <div class="seg" role="group" aria-label="Playback speed" id="speedSeg">
+              <button aria-pressed="false" data-r="0.25">¼×</button><button aria-pressed="false" data-r="0.5">½×</button><button aria-pressed="true" data-r="1">1×</button>
+            </div>
+            <div class="field" style="flex-direction:row;align-items:center;gap:6px"><label for="fps">FPS</label>
+              <select id="fps" class="input" style="width:auto;min-height:30px;padding:3px 6px"><option>30</option><option selected>60</option><option>120</option><option>240</option></select></div>
+          </div>
+
+          <div class="panel" style="padding:12px">
+            <div class="toolbar">
+              <div class="seg" role="group" aria-label="Drawing tool" id="toolSeg">
+                <button aria-pressed="true" data-t="none" title="No drawing">View</button>
+                <button aria-pressed="false" data-t="pen">Pen</button>
+                <button aria-pressed="false" data-t="arrow">Arrow</button>
+                <button aria-pressed="false" data-t="circle">Circle</button>
+                <button aria-pressed="false" data-t="angle">Angle</button>
+              </div>
+              <div class="row" id="swatches" role="group" aria-label="Ink color">
+                <button class="swatch" style="background:#ffd23f" data-c="#ffd23f" aria-pressed="true" aria-label="Yellow"></button>
+                <button class="swatch" style="background:#ff5a5f" data-c="#ff5a5f" aria-pressed="false" aria-label="Red"></button>
+                <button class="swatch" style="background:#4ade80" data-c="#4ade80" aria-pressed="false" aria-label="Green"></button>
+                <button class="swatch" style="background:#ffffff" data-c="#ffffff" aria-pressed="false" aria-label="White"></button>
+              </div>
+              <button class="btn sm" id="bUndo">Undo drawing</button>
+              <label class="check"><input type="checkbox" id="pauseOnDraw" checked> Stop playback at drawings</label>
+            </div>
+          </div>
+
+          <div class="panel">
+            <div class="panel-head"><h2>Pop time from video</h2><span class="li-sub">Pause on each moment, then tap its button</span></div>
+            <div class="row" style="margin-bottom:10px">
+              <button class="btn sm" data-mark="catch">① Ball in glove</button>
+              <button class="btn sm" data-mark="release">② Release</button>
+              <button class="btn sm" data-mark="arrive">③ Arrives at 2B</button>
+              <button class="btn sm" id="bClearTiming">Reset</button>
+            </div>
+            <div class="timing">
+              <div class="stat"><div class="k">Exchange</div><div class="v num" id="tEx">—</div></div>
+              <div class="stat"><div class="k">Throw flight</div><div class="v num" id="tFl">—</div></div>
+              <div class="stat"><div class="k">Pop time</div><div class="v num" id="tPop">—</div></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="feedback">
+          <div class="panel">
+            <div class="panel-head"><h2>Coach feedback</h2><span class="eyebrow" id="noteCount"></span></div>
+            <div class="notes" id="notes"></div>
+            <div class="note-add">
+              <div class="row">
+                <div class="seg" role="group" aria-label="Note type" id="typeSeg">
+                  <button aria-pressed="true" data-k="good">Doing well</button><button aria-pressed="false" data-k="fix">Fix</button><button aria-pressed="false" data-k="note">Note</button>
+                </div>
+              </div>
+              <div class="row">
+                <input class="input" id="noteText" placeholder="Type feedback…" style="flex:1;min-width:0" aria-label="Feedback text">
+                <button class="btn primary" id="bAddNote">Pin at <span id="pinAt" class="num">0:00</span></button>
+              </div>
+              <div class="row">
+                <button class="btn" id="bTalk" hidden><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0014 0M12 18v3"/></svg><span>Talk over the clip</span></button>
+                <label class="btn filebtn" title="Attach a recorded voiceover that plays in sync with the clip"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg><span id="audLbl">Attach voiceover audio</span><input type="file" id="audFile" accept="audio/*" aria-label="Attach voiceover audio"></label>
+              </div>
+              <div class="live" id="live"></div>
+            </div>
+          </div>
+          <div class="panel">
+            <div class="panel-head"><h2>Rep score</h2><span class="eyebrow" id="rubricArea"></span></div>
+            <div class="rubric" id="rubric"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= ZONE GAME ================= -->
+    <section id="v-zone" data-v="zone" hidden>
+      <div class="view-head">
+        <div>
+          <div class="eyebrow">Receiving · Framing game</div>
+          <h1>Zone Game</h1>
+          <p>Every pitch goes on the zone. Tap where it crossed, then log the call. Points come from the edges: steal strikes off the plate and don't give back strikes on it.</p>
+        </div>
+        <div class="row">
+          <label class="btn filebtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 16V4M7 9l5-5 5 5M4 20h16"/></svg>Import TrackMan CSV<input type="file" id="tmFile" accept=".csv,text/csv" aria-label="Import TrackMan CSV"></label>
+          <span class="mock">Mockup</span>
+        </div>
+      </div>
+      <div class="game">
+        <div class="panel zone-card">
+          <div class="row" style="justify-content:space-between">
+            <div class="seg" role="group" aria-label="Zone display" id="zoneMode">
+              <button aria-pressed="true" data-m="pitches">Pitches</button><button aria-pressed="false" data-m="heat">Heat map</button>
+            </div>
+            <div class="legend" id="zoneLegend"></div>
+          </div>
+          <svg class="zone-svg" id="zoneSvg" viewBox="0 0 300 370" role="img" aria-label="Strike zone from the catcher's view"></svg>
+          <div class="callbar">
+            <button class="btn strike" id="bStrike" disabled>Called strike <span class="eyebrow">S</span></button>
+            <button class="btn ball" id="bBall" disabled>Called ball <span class="eyebrow">B</span></button>
+            <button class="btn" id="bZUndo">Undo last</button>
+          </div>
+          <div class="toast" id="zToast" role="status"></div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:12px">
+          <div class="panel">
+            <div class="panel-head"><h2>This round</h2><span class="eyebrow num" id="roundN"></span></div>
+            <div class="progress" style="margin-bottom:12px"><b id="roundBar" style="width:0"></b></div>
+            <div class="stats">
+              <div class="stat"><div class="k">Round score</div><div class="v num" id="rScore">0</div></div>
+              <div class="stat"><div class="k">Personal best</div><div class="v num" id="rBest">0</div></div>
+            </div>
+            <div class="reps" id="roundReps" style="margin-top:12px"></div>
+          </div>
+          <div class="panel">
+            <div class="panel-head"><h2>All sessions</h2><span class="eyebrow num" id="zTotal"></span></div>
+            <div class="stats">
+              <div class="stat"><div class="k">Strikes stolen</div><div class="v num" id="zSteal">0</div></div>
+              <div class="stat"><div class="k">Strikes lost</div><div class="v num" id="zLost">0</div></div>
+              <div class="stat"><div class="k">Edge strike %</div><div class="v num" id="zEdge">—</div></div>
+              <div class="stat"><div class="k">Heart strike %</div><div class="v num" id="zHeart">—</div></div>
+            </div>
+          </div>
+          <div class="panel">
+            <h2 style="margin-bottom:8px">Scoring</h2>
+            <ul class="rules">
+              <li><b>+2</b> called strike just off the plate (stolen)</li>
+              <li><b>+1</b> called strike on the edge (kept)</li>
+              <li><b>−2</b> called ball on the edge or in the zone (lost)</li>
+              <li>Balls well off the plate and strikes down the middle score 0</li>
+              <li>A round is 20 pitches. The edge band is ±3 in around the zone.</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= BLOCKING ================= -->
+    <section id="v-blocking" data-v="blocking" hidden>
+      <div class="view-head">
+        <div>
+          <div class="eyebrow">Blocking · 10-ball gauntlet</div>
+          <h1>Blocking Map</h1>
+          <p>Tap where the ball hit the dirt, then the result. The map shows which spots the catcher keeps in front and which ones get away.</p>
+        </div>
+        <span class="mock">Mockup</span>
+      </div>
+      <div class="game">
+        <div class="panel zone-card">
+          <div class="legend"><span>Block rate</span><span>0%<span class="ramp"></span>100%</span><span>· number = reps</span></div>
+          <svg class="zone-svg" id="blockSvg" viewBox="0 0 300 300" role="img" aria-label="Dirt in front of home plate, catcher's view"></svg>
+          <div class="callbar">
+            <button class="btn strike" id="bSmother" disabled>Smothered (within 3 ft)</button>
+            <button class="btn" id="bRebound" disabled>Blocked, kicked away</button>
+            <button class="btn ball" id="bPassed" disabled>Got by</button>
+          </div>
+          <div class="toast" id="bToast" role="status"></div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:12px">
+          <div class="panel">
+            <div class="panel-head"><h2>Gauntlet</h2><span class="eyebrow num" id="gN"></span></div>
+            <div class="progress" style="margin-bottom:12px"><b id="gBar" style="width:0"></b></div>
+            <div class="stats">
+              <div class="stat"><div class="k">Score / 20</div><div class="v num" id="gScore">0</div></div>
+              <div class="stat"><div class="k">Best</div><div class="v num" id="gBest">0</div></div>
+            </div>
+            <div class="reps" id="gReps" style="margin-top:12px"></div>
+          </div>
+          <div class="panel">
+            <div class="panel-head"><h2>All reps</h2><span class="eyebrow num" id="bTotal"></span></div>
+            <div class="stats">
+              <div class="stat"><div class="k">Block rate</div><div class="v num" id="bRate">—</div></div>
+              <div class="stat"><div class="k">Smother rate</div><div class="v num" id="bSm">—</div></div>
+            </div>
+            <p class="li-sub" id="bWorst" style="margin:10px 0 0"></p>
+          </div>
+          <div class="panel">
+            <h2 style="margin-bottom:8px">Scoring</h2>
+            <ul class="rules"><li><b>2</b> smothered, ball within 3 ft</li><li><b>1</b> blocked but kicked away</li><li><b>0</b> got by the catcher</li><li>10 balls per gauntlet, 20 points max</li></ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= CATCHER PAGE ================= -->
+    <section id="v-catcher" data-v="catcher" hidden>
+      <div class="view-head">
+        <div>
+          <div class="eyebrow">5 Tool Performance · Catcher</div>
+          <h1>Sample catcher A</h1>
+          <p>One page, one plan. Numbers update from the Zone Game, Blocking Map and video timing in this prototype.</p>
+        </div>
+        <span class="mock">Mockup · example numbers</span>
+      </div>
+      <div class="ov-grid">
+        <div class="tile"><div class="eyebrow">Pop time</div><div class="v num" id="oPop">—</div><div class="sub">Last 8 weeks, from video</div><svg id="sp1" viewBox="0 0 200 40" preserveAspectRatio="none" aria-hidden="true"></svg></div>
+        <div class="tile"><div class="eyebrow">Exchange</div><div class="v num" id="oEx">—</div><div class="sub">Last 8 weeks, from video</div><svg id="sp2" viewBox="0 0 200 40" preserveAspectRatio="none" aria-hidden="true"></svg></div>
+        <div class="tile"><div class="eyebrow">Block rate</div><div class="v num" id="oBlock">—</div><div class="sub" id="oBlockSub"></div><svg id="sp3" viewBox="0 0 200 40" preserveAspectRatio="none" aria-hidden="true"></svg></div>
+        <div class="tile"><div class="eyebrow">Edge strike rate</div><div class="v num" id="oEdge">—</div><div class="sub" id="oEdgeSub"></div><svg id="sp4" viewBox="0 0 200 40" preserveAspectRatio="none" aria-hidden="true"></svg></div>
+      </div>
+      <div class="ov-cols">
+        <div class="panel"><div class="panel-head"><h2>This week</h2><span class="eyebrow">Assigned</span></div>
+          <div class="list">
+            <div><b>Receiving</b> · Low-away framing<div class="li-sub">Zone Game round × 3 · upload 1 clip</div></div>
+            <div><b>Blocking</b> · Short-hop blocks<div class="li-sub">10-ball gauntlet × 2 · upload 1 clip</div></div>
+            <div><b>Throwing</b> · Exchange reps<div class="li-sub">Film 5 throws to 2B from the side</div></div>
+          </div></div>
+        <div class="panel"><div class="panel-head"><h2>Latest coach notes</h2></div><div class="list" id="oNotes"></div></div>
+        <div class="panel"><div class="panel-head"><h2>Recent clips</h2></div><div class="list" id="oClips"></div></div>
+      </div>
+    </section>
+
+    <!-- ================= MODEL ================= -->
+    <section id="v-model" data-v="model" hidden>
+      <div class="view-head">
+        <div>
+          <div class="eyebrow">Later phase</div>
+          <h1>Strike/Ball Model</h1>
+          <p>How filmed reps could train a model that calls strikes and balls, and measures how much the catcher's glove work changes the call.</p>
+        </div>
+        <span class="mock">Plan</span>
+      </div>
+      <div class="pipe">
+        <div class="step"><div class="eyebrow">Step 1 · Film</div><h3>Same camera, every time</h3><p>One fixed camera behind the catcher at a set height, plus one from the side. A model learns much faster when the angle never changes.</p></div>
+        <div class="step"><div class="eyebrow">Step 2 · Label</div><h3>TrackMan gives the answer</h3><p>TrackMan's session CSV has exact plate location (PlateLocSide, PlateLocHeight) and the call. Match each row to its clip by time. No API needed.</p></div>
+        <div class="step"><div class="eyebrow">Step 3 · Train</div><h3>Ball, glove, catch point</h3><p>First teach it to find the ball and glove in each frame. Then predict where the pitch crossed and whether it's a strike.</p></div>
+        <div class="step"><div class="eyebrow">Step 4 · Use</div><h3>Auto-fill the Zone Game</h3><p>Uploaded bullpen video lands on the zone by itself. The coach confirms or fixes the call, and every fix becomes new training data.</p></div>
+      </div>
+      <div class="two">
+        <div class="panel prose">
+          <h2 style="margin-bottom:10px">Labeled pitches so far</h2>
+          <p><span class="num" id="mCount" style="font-family:var(--display);font-size:34px;font-weight:700">0</span> <span class="li-sub">of a 3,000-pitch first target</span></p>
+          <div class="progress" style="margin-bottom:12px"><b id="mBar" style="width:0"></b></div>
+          <p class="li-sub">This counts every called pitch logged in the Zone Game. Each one with a matching clip becomes a training example.</p>
+        </div>
+        <div class="panel prose">
+          <h2 style="margin-bottom:10px">What to plan for</h2>
+          <ul>
+            <li>Video alone can't see the 3D zone well. Use TrackMan locations to label the clips, then have the model learn from the video.</li>
+            <li>The most useful output is the <b>framing effect</b>: how often a pitch at the same spot gets called a strike for this catcher compared with average.</li>
+            <li>Expect a few thousand labeled pitches before the calls are reliable. Logging starts in the Zone Game now, so that data is building from day one.</li>
+            <li>Get TrackMan CSV exports from each bullpen session. That's the one thing to set up with the 5 Tool data team.</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+  </main>
+</div>
+
+<audio id="aud" preload="auto" hidden></audio>
+
+<script>
+(() => {
+const $ = (s, r = document) => r.querySelector(s);
+const $$ = (s, r = document) => [...r.querySelectorAll(s)];
+const fmt = t => { t = Math.max(0, t || 0); const m = Math.floor(t / 60), s = t - m * 60; return m + ':' + s.toFixed(2).padStart(5, '0'); };
+const fmtS = t => { t = Math.max(0, t || 0); const m = Math.floor(t / 60), s = Math.floor(t - m * 60); return m + ':' + String(s).padStart(2, '0'); };
+const esc = s => String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+let seed = 7; const rnd = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
+const gauss = () => { let u = 0, v = 0; while (!u) u = rnd(); while (!v) v = rnd(); return Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * v); };
+
+/* ---------------- Routing ---------------- */
+const VIEWS = ['review', 'zone', 'blocking', 'catcher', 'model'];
+function route() {
+  const v = VIEWS.includes(location.hash.slice(1)) ? location.hash.slice(1) : 'review';
+  $$('[data-v]').forEach(s => s.hidden = s.dataset.v !== v);
+  $$('.nav a').forEach(a => a.setAttribute('aria-current', a.dataset.view === v ? 'page' : 'false'));
+  if (v !== 'review') pause();
+  if (v === 'review') requestAnimationFrame(sizeCanvases);
+  if (v === 'catcher') renderOverview();
+  if (v === 'model') renderModel();
+}
+addEventListener('hashchange', route);
+
+/* ---------------- Rubrics ---------------- */
+const RUBRIC = {
+  Receiving: ['Setup and stance', 'Glove presentation', 'Beats the ball to the spot', 'Sticks the pitch'],
+  Blocking: ['Drop speed', 'Chest square to the ball', 'Glove seals the gap', 'Ball stays in front'],
+  Throwing: ['Exchange', 'Footwork', 'Arm path', 'Accuracy to the bag'],
+  'Game Calling': ['Pitch selection', 'Signs and pace', 'Reads the hitter', 'Communication']
+};
+
+/* ---------------- Clips (sample) ---------------- */
+let uid = 0;
+const clips = [
+  { id: ++uid, title: '10-ball blocking gauntlet', catcher: 'Sample catcher A', area: 'Blocking', by: 'Catcher', date: 'Nov 14', kind: 'demo', duration: 9.6,
+    notes: [
+      { t: 0.62, k: 'good', text: 'Quick drop. Knees hit before the ball lands.' },
+      { t: 3.05, k: 'fix', text: 'Chest is turned toward 1B here. Square up to the ball, not the plate.' },
+      { t: 5.45, k: 'fix', text: 'Glove came late. Get it down between the knees first.' },
+      { t: 7.9, k: 'good', text: 'That one is perfect. Ball dies right in front.' } ],
+    drawings: [ { t: 3.05, tool: 'arrow', color: '#ff5a5f', pts: [[.66, .52], [.53, .66]] }, { t: 5.45, tool: 'circle', color: '#ffd23f', pts: [[.43, .7], [.58, .9]] } ],
+    timing: {}, scores: { 0: 4, 1: 3, 2: 3, 3: 4 }, audio: null },
+  { id: ++uid, title: 'Low-away framing', catcher: 'Sample catcher A', area: 'Receiving', by: 'Coach', date: 'Nov 12', kind: 'demo', duration: 9.6,
+    notes: [
+      { t: 0.5, k: 'good', text: 'Relaxed glove, thumb under. Good.' },
+      { t: 2.95, k: 'fix', text: 'Glove drifts off the plate after the catch. Stick it for a full second.' },
+      { t: 5.35, k: 'note', text: 'Try the one-knee setup on this pitch next session.' } ],
+    drawings: [ { t: 2.95, tool: 'angle', color: '#ffd23f', pts: [[.5, .62], [.64, .54]] } ],
+    timing: {}, scores: { 0: 4, 1: 4, 2: 3, 3: 2 }, audio: null },
+  { id: ++uid, title: 'Pop time to 2B', catcher: 'Sample catcher A', area: 'Throwing', by: 'Catcher', date: 'Nov 10', kind: 'demo', duration: 4.8,
+    notes: [ { t: 0.62, k: 'good', text: 'Clean transfer. Ball out of the glove fast.' }, { t: 1.2, k: 'fix', text: 'Front foot opens early, so the throw runs to the 1B side.' } ],
+    drawings: [ { t: 1.2, tool: 'pen', color: '#4ade80', pts: [[.6, .78], [.62, .7], [.66, .62], [.7, .55], [.73, .5]] } ],
+    timing: { catch: 0.45, release: 1.2, arrive: 2.43 }, scores: { 0: 4, 1: 3, 2: 4, 3: 3 }, audio: null }
+];
+let cur = clips[0];
+
+/* ---------------- Player ---------------- */
+const vid = $('#vid'), aud = $('#aud'), demo = $('#demo'), ink = $('#ink'), stage = $('#stage');
+let demoT = 0, playing = false, rate = 1, lastT = 0, lastFrame = 0, holdUntilMove = false;
+const dur = () => cur.kind === 'video' ? (vid.duration || cur.duration || 0) : cur.duration;
+const now = () => cur.kind === 'video' ? vid.currentTime : demoT;
+function setTime(t) {
+  t = Math.max(0, Math.min(dur(), t));
+  if (cur.kind === 'video') vid.currentTime = t; else demoT = t;
+  lastT = t;
+  if (cur.audio) { try { aud.currentTime = t; } catch (e) {} }
+  paint();
+}
+function play() {
+  if (now() >= dur() - 0.01) setTime(0);
+  playing = true; $('#pausedFlag').hidden = true;
+  if (cur.kind === 'video') vid.play().catch(() => {});
+  if (cur.audio) { aud.currentTime = now(); aud.playbackRate = rate; aud.play().catch(() => {}); }
+  lastFrame = performance.now(); lastT = now(); setPlayIcon();
+}
+function pause() {
+  playing = false;
+  if (!vid.paused) vid.pause();
+  if (!aud.paused) aud.pause();
+  setPlayIcon();
+}
+function setPlayIcon() {
+  $('#playIco').innerHTML = playing ? '<path d="M6 4h4v16H6zM14 4h4v16h-4z"/>' : '<path d="M7 4l13 8-13 8z"/>';
+  $('#bPlay').setAttribute('aria-label', playing ? 'Pause' : 'Play');
+}
+const frameStep = () => 1 / (+$('#fps').value || 60);
+
+function tick(ts) {
+  if (playing) {
+    if (cur.kind === 'demo') {
+      demoT += (ts - lastFrame) / 1000 * rate;
+      if (demoT >= dur()) { demoT = dur(); pause(); }
+    } else if (vid.ended) pause();
+    const t = now();
+    if ($('#pauseOnDraw').checked) {
+      const hit = cur.drawings.find(d => d.t > lastT + 1e-4 && d.t <= t);
+      if (hit) { pause(); setTime(hit.t); $('#pausedFlag').hidden = false; }
+    }
+    lastT = now();
+  }
+  lastFrame = ts;
+  paint();
+  requestAnimationFrame(tick);
+}
+
+/* ---- demo scene (stands in for a real clip) ---- */
+function drawDemo(ctx, w, h, t, area) {
+  const g = ctx.createLinearGradient(0, 0, 0, h);
+  g.addColorStop(0, '#1d2a35'); g.addColorStop(.55, '#2a3640'); g.addColorStop(.56, '#5b4433'); g.addColorStop(1, '#3e2e22');
+  ctx.fillStyle = g; ctx.fillRect(0, 0, w, h);
+  ctx.strokeStyle = 'rgba(255,255,255,.06)'; ctx.lineWidth = 1;
+  for (let i = 1; i < 8; i++) { ctx.beginPath(); ctx.moveTo(w * i / 8, h * .56); ctx.lineTo(w * (i / 8 - .5) * 2.4 + w / 2, h); ctx.stroke(); }
+  const P = 2.4, k = Math.floor(t / P), p = t - k * P;
+  seedLocal = k * 97 + 13;
+  const ox = (lr() - .5) * .16 * w, oy = (lr() - .5) * .12 * h;
+  const cx = w * .5, base = h * .9;
+  let drop = 0;
+  if (area === 'Blocking') drop = Math.min(1, Math.max(0, (p - .18) / .22));
+  // plate
+  ctx.fillStyle = '#e9e6dc'; ctx.beginPath();
+  const pw = w * .08, py = h * .7; ctx.moveTo(cx - pw, py); ctx.lineTo(cx + pw, py); ctx.lineTo(cx + pw, py + h * .025); ctx.lineTo(cx, py + h * .05); ctx.lineTo(cx - pw, py + h * .025); ctx.closePath(); ctx.fill();
+  // catcher body
+  const bodyTop = h * (.5 + .1 * drop), bodyW = w * (.12 + .03 * drop);
+  ctx.fillStyle = '#1e3a52';
+  ctx.beginPath(); ctx.roundRect ? ctx.roundRect(cx - bodyW / 2, bodyTop, bodyW, base - bodyTop, 18) : ctx.rect(cx - bodyW / 2, bodyTop, bodyW, base - bodyTop); ctx.fill();
+  ctx.fillStyle = '#2b2f36'; ctx.beginPath(); ctx.arc(cx, bodyTop - h * .045, h * .055, 0, 7); ctx.fill();
+  ctx.fillStyle = 'rgba(160,190,210,.35)'; ctx.fillRect(cx - h * .04, bodyTop - h * .07, h * .08, h * .04);
+  // glove
+  let gx = cx + ox * .9 + w * .03, gy = h * .56 + oy;
+  const catchT = .45;
+  if (area === 'Blocking') { gx = cx; gy = h * (.6 + .22 * drop); }
+  if (area === 'Throwing' && p > catchT) { const q = Math.min(1, (p - catchT) / .7); gx = gx + (cx + w * .09 - gx) * q; gy = gy + (h * .42 - gy) * q; }
+  if (area === 'Receiving' && p > catchT && k % 2 === 1) { gx += Math.min(1, (p - catchT) / .4) * w * .04; }
+  ctx.fillStyle = '#8a5a2b'; ctx.beginPath(); ctx.ellipse(gx, gy, w * .035, h * .065, 0, 0, 7); ctx.fill();
+  ctx.strokeStyle = '#5e3c1c'; ctx.lineWidth = 2; ctx.stroke();
+  // ball
+  let bx, by, br, show = true;
+  const sx = w * .5, sy = h * .2;
+  if (p < catchT) {
+    const q = p / catchT;
+    if (area === 'Blocking') {
+      const land = .7, hx = cx + ox * .5, hy = h * .86;
+      if (q < land) { const r = q / land; bx = sx + (hx - sx) * r; by = sy + (hy - sy) * r * r; }
+      else { const r = (q - land) / (1 - land); bx = hx; by = hy - Math.sin(r * Math.PI) * h * .05; }
+      br = h * (.008 + .02 * q);
+    } else { bx = sx + (gx - sx) * q; by = sy + (gy - sy) * q * q; br = h * (.006 + .022 * q); }
+  } else if (area === 'Throwing' && p > 1.2 && p < 2.4) {
+    const q = (p - 1.2) / .8; bx = gx + (w * .5 - gx) * q; by = gy - (gy - h * .05) * q; br = h * .02 * (1 - q * .8);
+    if (q > 1) show = false;
+  } else if (area === 'Blocking' && p >= catchT) { bx = cx + ox * .4; by = h * .87; br = h * .028; }
+  else show = false;
+  if (show) { ctx.fillStyle = '#f7f5ee'; ctx.beginPath(); ctx.arc(bx, by, br, 0, 7); ctx.fill(); }
+  ctx.fillStyle = 'rgba(255,255,255,.55)'; ctx.font = `${Math.round(h * .035)}px "DM Mono",monospace`;
+  ctx.textAlign = 'right'; ctx.fillText(fmt(t), w - 12, h - 12);
+}
+let seedLocal = 1; const lr = () => (seedLocal = (seedLocal * 48271) % 2147483647) / 2147483647;
+
+/* ---- ink layer ---- */
+let draft = null, tool = 'none', inkColor = '#ffd23f';
+function sizeCanvases() {
+  const r = stage.getBoundingClientRect(), d = devicePixelRatio || 1;
+  [demo, ink].forEach(c => { c.width = Math.max(1, Math.round(r.width * d)); c.height = Math.max(1, Math.round(r.height * d)); });
+  paint();
+}
+new ResizeObserver(sizeCanvases).observe(stage);
+
+function drawShape(ctx, s, w, h) {
+  const lw = Math.max(2, w * .005);
+  ctx.strokeStyle = s.color; ctx.fillStyle = s.color; ctx.lineWidth = lw; ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+  ctx.shadowColor = 'rgba(0,0,0,.6)'; ctx.shadowBlur = 4;
+  const P = s.pts.map(([x, y]) => [x * w, y * h]);
+  if (s.tool === 'pen') { ctx.beginPath(); P.forEach(([x, y], i) => i ? ctx.lineTo(x, y) : ctx.moveTo(x, y)); ctx.stroke(); }
+  if (P.length < 2) { ctx.shadowBlur = 0; return; }
+  const [[x1, y1], [x2, y2]] = [P[0], P[P.length - 1]];
+  if (s.tool === 'arrow' || s.tool === 'angle') {
+    ctx.beginPath(); ctx.moveTo(x1, y1); ctx.lineTo(x2, y2); ctx.stroke();
+  }
+  if (s.tool === 'arrow') {
+    const a = Math.atan2(y2 - y1, x2 - x1), L = lw * 5;
+    ctx.beginPath(); ctx.moveTo(x2, y2); ctx.lineTo(x2 - L * Math.cos(a - .45), y2 - L * Math.sin(a - .45)); ctx.lineTo(x2 - L * Math.cos(a + .45), y2 - L * Math.sin(a + .45)); ctx.closePath(); ctx.fill();
+  }
+  if (s.tool === 'circle') { ctx.beginPath(); ctx.ellipse((x1 + x2) / 2, (y1 + y2) / 2, Math.abs(x2 - x1) / 2, Math.abs(y2 - y1) / 2, 0, 0, 7); ctx.stroke(); }
+  if (s.tool === 'angle') {
+    ctx.setLineDash([lw * 2, lw * 2]); ctx.beginPath(); ctx.moveTo(x1, y1); ctx.lineTo(x1 + Math.sign(x2 - x1 || 1) * Math.hypot(x2 - x1, y2 - y1), y1); ctx.stroke(); ctx.setLineDash([]);
+    const deg = Math.abs(Math.atan2(-(y2 - y1), Math.abs(x2 - x1)) * 180 / Math.PI);
+    ctx.font = `600 ${Math.round(h * .045)}px "DM Mono",monospace`; ctx.textAlign = 'left';
+    ctx.fillText(deg.toFixed(0) + '°', x1 + 8, y1 - 8);
+  }
+  ctx.shadowBlur = 0;
+}
+
+function paint() {
+  const t = now(), w = ink.width, h = ink.height;
+  if (cur.kind === 'demo') drawDemo(demo.getContext('2d'), demo.width, demo.height, t, cur.area);
+  const c = ink.getContext('2d'); c.clearRect(0, 0, w, h);
+  cur.drawings.filter(d => t >= d.t - .02 && t <= d.t + 1.2).forEach(d => drawShape(c, d, w, h));
+  if (draft) drawShape(c, draft, w, h);
+  // caption
+  const n = [...cur.notes].reverse().find(n => t >= n.t - .02 && t <= n.t + 2.8);
+  const cap = $('#caption');
+  if (n) { cap.hidden = false; const key = n.k + n.text; if (cap.dataset.key !== key) { cap.dataset.key = key; cap.innerHTML = `<span class="chip ${n.k}" style="color:${n.k === 'good' ? '#5cc98c' : n.k === 'fix' ? '#ff8f6b' : '#9cc9e8'}">${n.k === 'good' ? 'Good' : n.k === 'fix' ? 'Fix' : n.k === 'voice' ? 'Voice' : 'Note'}</span><span>${esc(n.text)}</span>`; } }
+  else cap.hidden = true;
+  // ui
+  const D = dur() || 1;
+  $('#scrub').max = D; if (document.activeElement !== $('#scrub') || playing) $('#scrub').value = t;
+  $('#timeLbl').textContent = fmt(t) + ' / ' + fmt(D);
+  $('#pinAt').textContent = fmt(t);
+}
+
+function toNorm(e) { const r = ink.getBoundingClientRect(); return [(e.clientX - r.left) / r.width, (e.clientY - r.top) / r.height]; }
+ink.addEventListener('pointerdown', e => {
+  if (tool === 'none') return;
+  pause(); ink.setPointerCapture(e.pointerId);
+  draft = { t: now(), tool, color: inkColor, pts: [toNorm(e)] };
+});
+ink.addEventListener('pointermove', e => {
+  if (!draft) return;
+  const p = toNorm(e);
+  if (draft.tool === 'pen') draft.pts.push(p); else draft.pts[1] = p;
+  paint();
+});
+ink.addEventListener('pointerup', () => {
+  if (!draft) return;
+  if (draft.pts.length > 1) { cur.drawings.push(draft); renderMarkers(); }
+  draft = null; paint();
+});
+$('#toolSeg').addEventListener('click', e => {
+  const b = e.target.closest('button'); if (!b) return;
+  tool = b.dataset.t; $$('#toolSeg button').forEach(x => x.setAttribute('aria-pressed', x === b));
+  ink.classList.toggle('off', tool === 'none');
+});
+$('#swatches').addEventListener('click', e => {
+  const b = e.target.closest('button'); if (!b) return;
+  inkColor = b.dataset.c; $$('#swatches button').forEach(x => x.setAttribute('aria-pressed', x === b));
+  if (tool === 'none') $('#toolSeg button[data-t="pen"]').click();
+});
+$('#bUndo').onclick = () => { cur.drawings.pop(); renderMarkers(); paint(); };
+
+/* ---- transport ---- */
+$('#bPlay').onclick = () => playing ? pause() : play();
+$('#bBack').onclick = () => { pause(); setTime(now() - frameStep()); };
+$('#bFwd').onclick = () => { pause(); setTime(now() + frameStep()); };
+$('#scrub').addEventListener('input', e => { pause(); setTime(+e.target.value); });
+$('#speedSeg').addEventListener('click', e => {
+  const b = e.target.closest('button'); if (!b) return;
+  rate = +b.dataset.r; vid.playbackRate = rate; aud.playbackRate = rate;
+  $$('#speedSeg button').forEach(x => x.setAttribute('aria-pressed', x === b));
+});
+addEventListener('keydown', e => {
+  if (location.hash && location.hash !== '#review') return;
+  if (/INPUT|SELECT|TEXTAREA/.test(document.activeElement.tagName)) return;
+  if (e.key === ' ') { e.preventDefault(); playing ? pause() : play(); }
+  if (e.key === ',' || e.key === 'ArrowLeft') { e.preventDefault(); pause(); setTime(now() - frameStep()); }
+  if (e.key === '.' || e.key === 'ArrowRight') { e.preventDefault(); pause(); setTime(now() + frameStep()); }
+});
+
+/* ---- timing ---- */
+$$('[data-mark]').forEach(b => b.onclick = () => { pause(); cur.timing[b.dataset.mark] = now(); renderTiming(); renderMarkers(); });
+$('#bClearTiming').onclick = () => { cur.timing = {}; renderTiming(); renderMarkers(); };
+function timingOf(c) {
+  const { catch: a, release: r, arrive: z } = c.timing || {};
+  const ok = (x, y) => x != null && y != null && y > x;
+  return { ex: ok(a, r) ? r - a : null, fl: ok(r, z) ? z - r : null, pop: ok(a, z) ? z - a : null };
+}
+function renderTiming() {
+  const t = timingOf(cur), f = v => v == null ? '—' : v.toFixed(2) + '<small>s</small>';
+  $('#tEx').innerHTML = f(t.ex); $('#tFl').innerHTML = f(t.fl); $('#tPop').innerHTML = f(t.pop);
+}
+
+/* ---- notes ---- */
+let noteK = 'good';
+$('#typeSeg').addEventListener('click', e => { const b = e.target.closest('button'); if (!b) return; noteK = b.dataset.k; $$('#typeSeg button').forEach(x => x.setAttribute('aria-pressed', x === b)); });
+function addNote(text, k, t) {
+  text = text.trim(); if (!text) return;
+  cur.notes.push({ t: t ?? now(), k: k || noteK, text });
+  cur.notes.sort((a, b) => a.t - b.t);
+  renderNotes(); renderMarkers(); paint();
+}
+$('#bAddNote').onclick = () => { pause(); addNote($('#noteText').value); $('#noteText').value = ''; };
+$('#noteText').addEventListener('keydown', e => { if (e.key === 'Enter') $('#bAddNote').click(); });
+function renderNotes() {
+  const box = $('#notes');
+  $('#noteCount').textContent = cur.notes.length + (cur.notes.length === 1 ? ' note' : ' notes');
+  if (!cur.notes.length) { box.innerHTML = '<p class="li-sub" style="margin:0">No feedback yet. Pause on a moment and pin a note, or talk over the clip.</p>'; return; }
+  box.innerHTML = cur.notes.map((n, i) => `<button class="note" data-i="${i}"><span class="t num">${fmt(n.t)}</span><span><span class="chip ${n.k}">${n.k === 'good' ? 'Doing well' : n.k === 'fix' ? 'Fix' : n.k === 'voice' ? 'Voice' : 'Note'}</span><p>${esc(n.text)}</p></span></button>`).join('');
+}
+$('#notes').addEventListener('click', e => { const b = e.target.closest('.note'); if (!b) return; pause(); setTime(cur.notes[+b.dataset.i].t); });
+
+function renderMarkers() {
+  const D = dur() || 1, m = $('#markers');
+  const items = [
+    ...cur.notes.map(n => `<span class="mk ${n.k}" style="left:${n.t / D * 100}%" title="${fmt(n.t)} ${esc(n.text)}"></span>`),
+    ...cur.drawings.map(d => `<span class="mk draw" style="left:${d.t / D * 100}%" title="Drawing at ${fmt(d.t)}"></span>`),
+    ...Object.entries(cur.timing || {}).map(([k, t]) => `<span class="mk time" style="left:${t / D * 100}%" title="${k} ${fmt(t)}"></span>`)
+  ];
+  m.innerHTML = items.join('');
+}
+
+/* ---- rubric ---- */
+function renderRubric() {
+  const crit = RUBRIC[cur.area] || RUBRIC.Receiving;
+  $('#rubricArea').textContent = cur.area;
+  const vals = crit.map((_, i) => cur.scores[i]).filter(Boolean);
+  const avg = vals.length ? (vals.reduce((a, b) => a + b, 0) / vals.length).toFixed(1) : '—';
+  $('#rubric').innerHTML = crit.map((c, i) => `<div class="crit"><span>${c}</span><div class="dots" role="group" aria-label="${c}">${[1, 2, 3, 4, 5].map(v => `<button data-i="${i}" data-v="${v}" aria-pressed="${cur.scores[i] === v}">${v}</button>`).join('')}</div></div>`).join('')
+    + `<div class="avg"><span class="eyebrow">Rep average</span><span class="num" style="font-family:var(--display);font-size:28px;font-weight:700">${avg}<small style="font-size:15px;color:var(--muted)"> / 5</small></span></div>`;
+}
+$('#rubric').addEventListener('click', e => { const b = e.target.closest('button[data-v]'); if (!b) return; cur.scores[b.dataset.i] = +b.dataset.v; renderRubric(); });
+
+/* ---- clip list / switching ---- */
+function renderClips() {
+  $('#clipCount').textContent = clips.length + ' clips';
+  $('#clipList').innerHTML = clips.map(c => `<button class="clip" role="listitem" data-id="${c.id}" aria-current="${c === cur}"><span class="thumb"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5l12 7-12 7z"/></svg></span><span><b>${esc(c.title)}</b><span>${esc(c.area)} · ${esc(c.catcher)}</span><span>${esc(c.by)} upload · ${esc(c.date)}${c.notes.length ? ' · ' + c.notes.length + ' notes' : ''}</span></span></button>`).join('');
+}
+$('#clipList').addEventListener('click', e => { const b = e.target.closest('.clip'); if (b) loadClip(clips.find(c => c.id === +b.dataset.id)); });
+function loadClip(c) {
+  pause(); cur = c; demoT = 0; lastT = 0;
+  $('#clipTitle').textContent = c.title; $('#clipArea').textContent = c.area;
+  $('#clipWho').textContent = `${c.catcher} · ${c.by} upload · ${c.date}`;
+  $('#stageBadge').textContent = c.kind === 'demo' ? 'SAMPLE CLIP · ANIMATED STAND-IN' : 'UPLOADED CLIP';
+  $('#pausedFlag').hidden = true;
+  if (c.kind === 'video') { vid.hidden = false; demo.hidden = true; if (vid.src !== c.src) vid.src = c.src; vid.currentTime = 0; }
+  else { vid.hidden = true; demo.hidden = false; vid.removeAttribute('src'); vid.load(); }
+  if (c.audio) { aud.src = c.audio; $('#audLbl').textContent = 'Voiceover attached'; } else { aud.removeAttribute('src'); $('#audLbl').textContent = 'Attach voiceover audio'; }
+  renderClips(); renderNotes(); renderMarkers(); renderTiming(); renderRubric(); paint();
+}
+vid.addEventListener('loadedmetadata', () => { cur.duration = vid.duration; renderMarkers(); paint(); });
+vid.addEventListener('pause', () => { if (playing && !vid.ended) { /* external pause */ } });
+
+$('#upFile').addEventListener('change', e => {
+  const f = e.target.files[0]; if (!f) return;
+  const c = { id: ++uid, title: $('#upDrill').value.trim() || f.name.replace(/\.[^.]+$/, ''), catcher: $('#upCatcher').value, area: $('#upArea').value, by: $('#upBy').value,
+    date: new Date().toLocaleDateString(undefined, { month: 'short', day: 'numeric' }), kind: 'video', src: URL.createObjectURL(f), duration: 0, notes: [], drawings: [], timing: {}, scores: {}, audio: null };
+  clips.unshift(c); loadClip(c); e.target.value = '';
+});
+$('#audFile').addEventListener('change', e => {
+  const f = e.target.files[0]; if (!f) return;
+  cur.audio = URL.createObjectURL(f); aud.src = cur.audio; $('#audLbl').textContent = 'Voiceover attached';
+  cur.notes.push({ t: 0, k: 'voice', text: 'Coach voiceover attached: ' + f.name }); cur.notes.sort((a, b) => a.t - b.t);
+  renderNotes(); renderMarkers(); e.target.value = '';
+});
+
+/* ---- dictation: coach talks, phrases land on the timeline ---- */
+let dict = null, listening = false;
+(async () => {
+  try { dict = await window.claude?.use?.('dictation'); } catch (e) { dict = null; }
+  if (!dict) return;
+  $('#bTalk').hidden = false;
+  dict.onPartial(({ text }) => { $('#live').textContent = '“' + text + '”'; });
+  dict.onFinal(({ text }) => { $('#live').textContent = ''; addNote(text, 'voice', Math.max(0, now() - 1)); });
+  dict.onState(({ state }) => {
+    listening = state === 'listening';
+    $('#bTalk span').textContent = listening ? 'Stop talking' : 'Talk over the clip';
+    $('#bTalk').classList.toggle('primary', listening);
+    if (!listening) $('#live').textContent = '';
+  });
+})();
+$('#bTalk').onclick = () => {
+  if (!dict) return;
+  if (listening) { dict.stop().catch(() => {}); return; }
+  dict.start().catch(err => { $('#live').textContent = err && err.code === 'not_granted' ? 'Microphone not allowed. Type notes instead.' : ''; });
+  $('#live').textContent = 'Listening. Play or step through the clip and talk.';
+};
+
+/* ================= ZONE GAME ================= */
+const ZX = x => 150 + x * 100, ZY = y => 345 - (y - 0.85) * 100;
+const IX = px => (px - 150) / 100, IY = py => 0.85 + (345 - py) / 100;
+const HALF = 0.708 + 0.121, BOT = 1.5 - 0.121, TOP = 3.5 + 0.121, BAND = 0.25;
+function region(p) {
+  const dx = Math.abs(p.x) - HALF, dTop = p.y - TOP, dBot = BOT - p.y;
+  const out = Math.max(dx, dTop, dBot); // >0 outside, <0 inside
+  if (out > BAND) return 'off';
+  if (out > 0) return 'shadowOut';
+  if (out > -BAND) return 'edge';
+  return 'heart';
+}
+function pts(p) {
+  const r = region(p);
+  if (r === 'shadowOut') return p.call === 'S' ? 2 : 0;
+  if (r === 'edge') return p.call === 'S' ? 1 : -2;
+  if (r === 'heart') return p.call === 'S' ? 0 : -2;
+  return 0;
+}
+// sample history: this catcher steals low, loses glove-side away
+const zone = { pitches: [], roundStart: 0, best: 0, pending: null, mode: 'pitches' };
+seed = 11;
+for (let i = 0; i < 160; i++) {
+  const x = gauss() * .62, y = 2.5 + gauss() * .72;
+  const p = { x, y, src: 'sample' };
+  const dx = Math.abs(x) - .708, dy = Math.max(1.5 - y, y - 3.5), d = Math.max(dx, dy);
+  let prob = 1 / (1 + Math.exp(d * 14));
+  if (y < 1.75 && Math.abs(x) < .9) prob += .18;
+  if (x > .55) prob -= .2;
+  p.call = rnd() < Math.min(.98, Math.max(.02, prob)) ? 'S' : 'B';
+  zone.pitches.push(p);
+}
+zone.roundStart = zone.pitches.length; zone.best = 14;
+
+const svgNS = 'http://www.w3.org/2000/svg';
+function renderZone() {
+  const s = $('#zoneSvg');
+  const zx1 = ZX(-HALF + .121), zx2 = ZX(HALF - .121), zy1 = ZY(3.5), zy2 = ZY(1.5);
+  const bx1 = ZX(-HALF - BAND), bx2 = ZX(HALF + BAND), by1 = ZY(TOP + BAND), by2 = ZY(BOT - BAND);
+  const ix1 = ZX(-HALF + BAND), ix2 = ZX(HALF - BAND), iy1 = ZY(TOP - BAND), iy2 = ZY(BOT + BAND);
+  let html = `<rect x="0" y="0" width="300" height="370" fill="var(--surface-2)" rx="10"/>`;
+  if (zone.mode === 'heat') {
+    const cs = .25;
+    for (let gx = -1.5; gx < 1.5 - 1e-6; gx += cs) for (let gy = .85; gy < 4.45 - 1e-6; gy += cs) {
+      const inCell = zone.pitches.filter(p => p.x >= gx && p.x < gx + cs && p.y >= gy && p.y < gy + cs);
+      if (inCell.length < 2) continue;
+      const r = inCell.filter(p => p.call === 'S').length / inCell.length;
+      html += `<rect x="${ZX(gx)}" y="${ZY(gy + cs)}" width="25" height="25" fill="var(--heat)" fill-opacity="${(0.06 + r * .84).toFixed(2)}"><title>${Math.round(r * 100)}% strikes · ${inCell.length} pitches</title></rect>`;
+    }
+  }
+  html += `<path d="M${bx1} ${by1}H${bx2}V${by2}H${bx1}Z M${ix1} ${iy1}V${iy2}H${ix2}V${iy1}Z" fill="var(--warn)" fill-opacity=".09" fill-rule="evenodd"/>`;
+  html += `<rect x="${zx1}" y="${zy1}" width="${zx2 - zx1}" height="${zy2 - zy1}" fill="none" stroke="var(--ink)" stroke-width="2"/>`;
+  for (let i = 1; i < 3; i++) {
+    html += `<line x1="${zx1 + (zx2 - zx1) * i / 3}" y1="${zy1}" x2="${zx1 + (zx2 - zx1) * i / 3}" y2="${zy2}" stroke="var(--ink)" stroke-opacity=".18"/>`;
+    html += `<line x1="${zx1}" y1="${zy1 + (zy2 - zy1) * i / 3}" x2="${zx2}" y2="${zy1 + (zy2 - zy1) * i / 3}" stroke="var(--ink)" stroke-opacity=".18"/>`;
+  }
+  html += `<rect x="${bx1}" y="${by1}" width="${bx2 - bx1}" height="${by2 - by1}" fill="none" stroke="var(--warn)" stroke-dasharray="4 4" stroke-opacity=".7"/>`;
+  html += `<path d="M${ZX(-.708)} 352 H${ZX(.708)} L${ZX(.708)} 358 L150 364 L${ZX(-.708)} 358Z" fill="var(--line)"/>`;
+  html += `<text x="${bx2 + 4}" y="${by1 + 10}" font-size="9" fill="var(--warn)">EDGE</text>`;
+  html += `<text x="10" y="18" font-size="9" fill="var(--muted)">CATCHER'S VIEW</text>`;
+  if (zone.mode === 'pitches') {
+    zone.pitches.forEach((p, i) => {
+      const round = i >= zone.roundStart, r = round ? 6 : 4.2;
+      const col = p.call === 'S' ? 'var(--good)' : 'var(--bad)';
+      html += p.call === 'S'
+        ? `<circle cx="${ZX(p.x)}" cy="${ZY(p.y)}" r="${r}" fill="${col}" fill-opacity="${round ? .95 : .55}" stroke="var(--surface)" stroke-width="${round ? 1.5 : .6}"/>`
+        : `<circle cx="${ZX(p.x)}" cy="${ZY(p.y)}" r="${r - .8}" fill="var(--surface)" fill-opacity=".3" stroke="${col}" stroke-opacity="${round ? 1 : .6}" stroke-width="${round ? 2 : 1.3}"/>`;
+    });
+  }
+  if (zone.pending) html += `<circle class="pulse" cx="${ZX(zone.pending.x)}" cy="${ZY(zone.pending.y)}" r="8" fill="none" stroke="var(--accent)" stroke-width="3"/><circle cx="${ZX(zone.pending.x)}" cy="${ZY(zone.pending.y)}" r="3" fill="var(--accent)"/>`;
+  s.innerHTML = html;
+  $('#zoneLegend').innerHTML = zone.mode === 'pitches'
+    ? `<span><i style="background:var(--good)"></i>Called strike</span><span><i style="border:2px solid var(--bad);width:10px;height:10px"></i>Called ball</span><span>Big dots = this round</span>`
+    : `<span>Called-strike %</span><span>0%<span class="ramp"></span>100%</span>`;
+  $('#bStrike').disabled = $('#bBall').disabled = !zone.pending;
+
+  // stats
+  const all = zone.pitches, round = all.slice(zone.roundStart);
+  const score = round.reduce((a, p) => a + pts(p), 0);
+  $('#roundN').textContent = `${round.length} / 20 pitches`;
+  $('#roundBar').style.width = Math.min(100, round.length / 20 * 100) + '%';
+  $('#rScore').textContent = score; $('#rBest').textContent = zone.best;
+  $('#roundReps').innerHTML = round.map(p => { const v = pts(p); return `<span class="rep" title="${p.call === 'S' ? 'Strike' : 'Ball'}, ${region(p)}" style="background:${v > 0 ? 'var(--good)' : v < 0 ? 'var(--bad)' : 'var(--muted)'}">${v > 0 ? '+' + v : v}</span>`; }).join('') || '<span class="li-sub">Tap the zone to log the first pitch.</span>';
+  const steal = all.filter(p => region(p) === 'shadowOut' && p.call === 'S').length;
+  const lost = all.filter(p => (region(p) === 'edge' || region(p) === 'heart') && p.call === 'B').length;
+  const edge = all.filter(p => region(p) === 'edge' || region(p) === 'shadowOut');
+  const heart = all.filter(p => region(p) === 'heart');
+  $('#zTotal').textContent = all.length + ' called pitches';
+  $('#zSteal').textContent = steal; $('#zLost').textContent = lost;
+  $('#zEdge').textContent = edge.length ? Math.round(edge.filter(p => p.call === 'S').length / edge.length * 100) + '%' : '—';
+  $('#zHeart').textContent = heart.length ? Math.round(heart.filter(p => p.call === 'S').length / heart.length * 100) + '%' : '—';
+}
+$('#zoneSvg').addEventListener('click', e => {
+  const s = $('#zoneSvg'), pt = s.createSVGPoint(); pt.x = e.clientX; pt.y = e.clientY;
+  const q = pt.matrixTransform(s.getScreenCTM().inverse());
+  zone.pending = { x: IX(q.x), y: IY(q.y) }; renderZone();
+});
+function callPitch(c) {
+  if (!zone.pending) return;
+  const p = { ...zone.pending, call: c, src: 'coach' }; zone.pending = null; zone.pitches.push(p);
+  const v = pts(p), labels = { shadowOut: 'just off the plate', edge: 'on the edge', heart: 'down the middle', off: 'well off the plate' };
+  $('#zToast').textContent = `${c === 'S' ? 'Strike' : 'Ball'} ${labels[region(p)]}: ${v > 0 ? '+' : ''}${v}`;
+  const round = zone.pitches.slice(zone.roundStart);
+  if (round.length >= 20) {
+    const sc = round.reduce((a, q) => a + pts(q), 0);
+    const pb = sc > zone.best; zone.best = Math.max(zone.best, sc);
+    $('#zToast').textContent = `Round done: ${sc} points${pb ? '. New personal best.' : '.'} Next round started.`;
+    zone.roundStart = zone.pitches.length;
+  }
+  renderZone();
+}
+$('#bStrike').onclick = () => callPitch('S');
+$('#bBall').onclick = () => callPitch('B');
+$('#bZUndo').onclick = () => { if (zone.pending) zone.pending = null; else if (zone.pitches.length > zone.roundStart) zone.pitches.pop(); renderZone(); };
+$('#zoneMode').addEventListener('click', e => { const b = e.target.closest('button'); if (!b) return; zone.mode = b.dataset.m; $$('#zoneMode button').forEach(x => x.setAttribute('aria-pressed', x === b)); renderZone(); });
+addEventListener('keydown', e => {
+  if (location.hash !== '#zone' || /INPUT|SELECT/.test(document.activeElement.tagName)) return;
+  if (e.key === 's' || e.key === 'S') callPitch('S');
+  if (e.key === 'b' || e.key === 'B') callPitch('B');
+});
+
+// TrackMan CSV import
+function parseCSV(text) {
+  const rows = []; let row = [], f = '', q = false;
+  for (let i = 0; i < text.length; i++) {
+    const c = text[i];
+    if (q) { if (c === '"') { if (text[i + 1] === '"') { f += '"'; i++; } else q = false; } else f += c; }
+    else if (c === '"') q = true;
+    else if (c === ',') { row.push(f); f = ''; }
+    else if (c === '\n' || c === '\r') { if (c === '\r' && text[i + 1] === '\n') i++; row.push(f); rows.push(row); row = []; f = ''; }
+    else f += c;
+  }
+  if (f || row.length) { row.push(f); rows.push(row); }
+  return rows;
+}
+$('#tmFile').addEventListener('change', async e => {
+  const f = e.target.files[0]; if (!f) return; e.target.value = '';
+  const rows = parseCSV(await f.text()); const head = (rows.shift() || []).map(h => h.trim());
+  const iS = head.indexOf('PlateLocSide'), iH = head.indexOf('PlateLocHeight'), iC = head.indexOf('PitchCall');
+  if (iS < 0 || iH < 0 || iC < 0) { $('#zToast').textContent = 'That file is missing PlateLocSide, PlateLocHeight or PitchCall. Export the full TrackMan session CSV.'; return; }
+  let n = 0;
+  rows.forEach(r => {
+    const x = parseFloat(r[iS]), y = parseFloat(r[iH]), c = (r[iC] || '').trim();
+    if (!isFinite(x) || !isFinite(y)) return;
+    if (c === 'StrikeCalled' || c === 'BallCalled') { zone.pitches.push({ x, y, call: c === 'StrikeCalled' ? 'S' : 'B', src: 'trackman' }); n++; }
+  });
+  zone.roundStart = zone.pitches.length;
+  $('#zToast').textContent = `Imported ${n} called pitches from ${rows.length} TrackMan rows.`;
+  renderZone();
+});
+
+/* ================= BLOCKING ================= */
+const COLS = ['Glove side', 'Middle', 'Arm side'], ROWS = ['Long hop', 'Mid hop', 'Short hop'];
+const block = { reps: [], start: 0, best: 15, pending: null };
+seed = 23;
+for (let i = 0; i < 90; i++) {
+  const c = Math.floor(rnd() * 3), r = Math.floor(rnd() * 3);
+  let good = .78; if (c === 2) good -= .25; if (r === 2) good -= .12; if (c === 1) good += .1;
+  const u = rnd(); const out = u < good * .75 ? 'sm' : u < good ? 'rb' : 'pb';
+  block.reps.push({ c, r, out });
+}
+block.start = block.reps.length;
+const BV = { sm: 2, rb: 1, pb: 0 };
+function renderBlock() {
+  const s = $('#blockSvg');
+  const X0 = 30, Y0 = 20, CW = 80, RH = 70;
+  let html = `<rect x="0" y="0" width="300" height="300" rx="10" fill="var(--surface-2)"/>`;
+  for (let r = 0; r < 3; r++) for (let c = 0; c < 3; c++) {
+    const reps = block.reps.filter(q => q.c === c && q.r === r);
+    const rate = reps.length ? reps.filter(q => q.out !== 'pb').length / reps.length : 0;
+    const sel = block.pending && block.pending.c === c && block.pending.r === r;
+    html += `<g class="bcell" data-c="${c}" data-r="${r}" style="cursor:pointer"><rect x="${X0 + c * CW}" y="${Y0 + r * RH}" width="${CW - 4}" height="${RH - 4}" rx="6" fill="var(--heat)" fill-opacity="${reps.length ? (0.08 + rate * .8).toFixed(2) : 0.04}" stroke="${sel ? 'var(--accent)' : 'var(--line)'}" stroke-width="${sel ? 3 : 1}"/>
+      <text x="${X0 + c * CW + (CW - 4) / 2}" y="${Y0 + r * RH + 30}" text-anchor="middle" font-size="17" font-weight="600" fill="var(--ink)" font-family="var(--display)">${reps.length ? Math.round(rate * 100) + '%' : '—'}</text>
+      <text x="${X0 + c * CW + (CW - 4) / 2}" y="${Y0 + r * RH + 48}" text-anchor="middle" font-size="9.5" fill="var(--muted)" font-family="var(--mono)">${reps.length} reps</text></g>`;
+  }
+  ROWS.forEach((l, r) => html += `<text x="24" y="${Y0 + r * RH + 34}" text-anchor="end" font-size="8" fill="var(--muted)" font-family="var(--mono)" transform="rotate(-90 ${18} ${Y0 + r * RH + 33})">${l.toUpperCase()}</text>`);
+  COLS.forEach((l, c) => html += `<text x="${X0 + c * CW + 38}" y="${Y0 + 3 * RH + 12}" text-anchor="middle" font-size="8.5" fill="var(--muted)" font-family="var(--mono)">${l.toUpperCase()}</text>`);
+  html += `<path d="M120 252 H180 L180 262 L150 276 L120 262Z" fill="var(--line)"/><text x="150" y="292" text-anchor="middle" font-size="8.5" fill="var(--muted)" font-family="var(--mono)">CATCHER</text>`;
+  s.innerHTML = html;
+  ['#bSmother', '#bRebound', '#bPassed'].forEach(id => $(id).disabled = !block.pending);
+  const g = block.reps.slice(block.start), sc = g.reduce((a, q) => a + BV[q.out], 0);
+  $('#gN').textContent = `${g.length} / 10 balls`; $('#gBar').style.width = g.length * 10 + '%';
+  $('#gScore').textContent = sc; $('#gBest').textContent = block.best;
+  $('#gReps').innerHTML = g.map(q => `<span class="rep" style="background:${q.out === 'sm' ? 'var(--good)' : q.out === 'rb' ? 'var(--warn)' : 'var(--bad)'}">${BV[q.out]}</span>`).join('') || '<span class="li-sub">Tap a spot in the dirt to log the first ball.</span>';
+  const all = block.reps, ok = all.filter(q => q.out !== 'pb').length;
+  $('#bTotal').textContent = all.length + ' reps';
+  $('#bRate').textContent = all.length ? Math.round(ok / all.length * 100) + '%' : '—';
+  $('#bSm').textContent = all.length ? Math.round(all.filter(q => q.out === 'sm').length / all.length * 100) + '%' : '—';
+  let worst = null;
+  for (let r = 0; r < 3; r++) for (let c = 0; c < 3; c++) { const reps = all.filter(q => q.c === c && q.r === r); if (reps.length < 4) continue; const rt = reps.filter(q => q.out !== 'pb').length / reps.length; if (!worst || rt < worst.rt) worst = { rt, c, r }; }
+  $('#bWorst').textContent = worst ? `Weakest spot: ${COLS[worst.c].toLowerCase()}, ${ROWS[worst.r].toLowerCase()} (${Math.round(worst.rt * 100)}%). Good target for next week's drill.` : '';
+}
+$('#blockSvg').addEventListener('click', e => { const g = e.target.closest('.bcell'); if (!g) return; block.pending = { c: +g.dataset.c, r: +g.dataset.r }; renderBlock(); });
+function logBlock(out) {
+  if (!block.pending) return;
+  block.reps.push({ ...block.pending, out }); block.pending = null;
+  const g = block.reps.slice(block.start);
+  $('#bToast').textContent = { sm: 'Smothered: 2 points', rb: 'Blocked, kicked away: 1 point', pb: 'Got by: 0 points' }[out];
+  if (g.length >= 10) { const sc = g.reduce((a, q) => a + BV[q.out], 0); const pb = sc > block.best; block.best = Math.max(block.best, sc); $('#bToast').textContent = `Gauntlet done: ${sc}/20${pb ? '. New best.' : '.'} Next one started.`; block.start = block.reps.length; }
+  renderBlock();
+}
+$('#bSmother').onclick = () => logBlock('sm'); $('#bRebound').onclick = () => logBlock('rb'); $('#bPassed').onclick = () => logBlock('pb');
+
+/* ================= OVERVIEW ================= */
+function spark(id, data, lowerIsBetter) {
+  const s = $(id), min = Math.min(...data), max = Math.max(...data), pad = (max - min) * .15 || .01;
+  const X = i => 4 + i * (192 / (data.length - 1)), Y = v => 36 - (v - min + pad) / (max - min + 2 * pad) * 32;
+  const d = data.map((v, i) => (i ? 'L' : 'M') + X(i).toFixed(1) + ' ' + Y(v).toFixed(1)).join('');
+  const better = lowerIsBetter ? data.at(-1) <= data[0] : data.at(-1) >= data[0];
+  s.innerHTML = `<line x1="0" x2="200" y1="20" y2="20" stroke="var(--line)" stroke-dasharray="2 3"/><path d="${d} L${X(data.length - 1)} 40 L4 40Z" fill="var(--accent)" fill-opacity=".1"/><path d="${d}" fill="none" stroke="var(--accent)" stroke-width="2" vector-effect="non-scaling-stroke"/><circle cx="${X(data.length - 1)}" cy="${Y(data.at(-1))}" r="3.5" fill="${better ? 'var(--good)' : 'var(--bad)'}"/>`;
+}
+function renderOverview() {
+  const tm = clips.map(timingOf).filter(t => t.pop);
+  const popHist = [2.09, 2.07, 2.08, 2.04, 2.03, 2.01, 1.99], exHist = [.82, .8, .81, .78, .77, .76, .75];
+  const pop = tm.length ? tm.at(-1).pop : null, ex = tm.length && tm.at(-1).ex ? tm.at(-1).ex : null;
+  if (pop) popHist.push(+pop.toFixed(2)); if (ex) exHist.push(+ex.toFixed(2));
+  $('#oPop').innerHTML = popHist.at(-1).toFixed(2) + '<small>s</small>';
+  $('#oEx').innerHTML = exHist.at(-1).toFixed(2) + '<small>s</small>';
+  spark('#sp1', popHist, true); spark('#sp2', exHist, true);
+  const all = block.reps, rate = all.filter(q => q.out !== 'pb').length / all.length;
+  $('#oBlock').innerHTML = Math.round(rate * 100) + '<small>%</small>'; $('#oBlockSub').textContent = all.length + ' reps logged';
+  const bh = [.74, .76, .75, .79, .8, .82, .81, rate]; spark('#sp3', bh, false);
+  const edge = zone.pitches.filter(p => region(p) === 'edge' || region(p) === 'shadowOut');
+  const er = edge.filter(p => p.call === 'S').length / (edge.length || 1);
+  $('#oEdge').innerHTML = Math.round(er * 100) + '<small>%</small>'; $('#oEdgeSub').textContent = edge.length + ' edge pitches';
+  spark('#sp4', [.41, .43, .42, .46, .45, .48, .47, er], false);
+  const notes = clips.flatMap(c => c.notes.filter(n => n.k !== 'voice' || true).map(n => ({ ...n, clip: c }))).slice(-4).reverse();
+  $('#oNotes').innerHTML = clips.flatMap(c => c.notes.map(n => ({ n, c }))).filter(x => x.n.k !== 'good').slice(0, 4).map(({ n, c }) => `<div><span class="chip ${n.k}">${n.k === 'fix' ? 'Fix' : n.k === 'voice' ? 'Voice' : 'Note'}</span><div style="margin-top:4px">${esc(n.text)}</div><div class="li-sub">${esc(c.title)} · ${fmt(n.t)}</div></div>`).join('');
+  $('#oClips').innerHTML = clips.slice(0, 4).map(c => `<div><button class="linkbtn" data-open="${c.id}">${esc(c.title)}</button><div class="li-sub">${esc(c.area)} · ${esc(c.by)} upload · ${c.notes.length} notes</div></div>`).join('');
+}
+$('#oClips').addEventListener('click', e => { const b = e.target.closest('[data-open]'); if (!b) return; loadClip(clips.find(c => c.id === +b.dataset.open)); location.hash = 'review'; });
+function renderModel() {
+  const n = zone.pitches.length; $('#mCount').textContent = n.toLocaleString();
+  $('#mBar').style.width = Math.min(100, n / 3000 * 100) + '%';
+}
+
+/* ---------------- boot ---------------- */
+loadClip(clips[0]); renderZone(); renderBlock(); route(); sizeCanvases();
+requestAnimationFrame(t => { lastFrame = t; requestAnimationFrame(tick); });
+})();
+</script>
