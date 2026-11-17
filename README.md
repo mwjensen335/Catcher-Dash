@@ -28,18 +28,20 @@ Open http://localhost:5173. With no Supabase keys it runs in **demo mode**: samp
 ## Stack
 
 - **React + TypeScript + Vite**: the web app (`src/`)
-- **Cloudflare Pages**: hosting
+- **Cloudflare Workers** (static assets): hosting
 - **Supabase**: logins, Postgres database, access rules (`supabase/schema.sql`)
 - **Cloudflare Stream**: video storage, conversion of phone video, and playback
 
-## Deploy to Cloudflare Pages
+## Deploy to Cloudflare
+
+Hosted as a Cloudflare Worker serving static files (config in `wrangler.jsonc`).
 
 1. Push this folder to a GitHub repository.
-2. Cloudflare dashboard → Workers & Pages → Create → Pages → connect the repository.
-3. Build command `npm run build`, output folder `dist`.
-4. Add the environment variables from `.env.example` (once Supabase exists).
+2. Cloudflare dashboard → Workers & Pages → Create → Import a repository.
+3. Build command `npm run build`, deploy command `npx wrangler deploy`.
+4. Add the environment variables from `.env.example` as **build** variables (once Supabase exists).
 
-Single-page routes (`/zone`, `/review?clip=…`) work on Pages without extra config.
+Single-page routes (`/zone`, `/review?clip=…`) fall back to `index.html` via `not_found_handling` in `wrangler.jsonc`.
 
 ## Set up Supabase
 

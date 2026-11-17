@@ -1,0 +1,10 @@
+// Cloudflare Workers config: serves the built site from dist/.
+// "single-page-application" sends unknown paths (/zone, /review?clip=…) to index.html so React Router handles them.
+{
+  "name": "catcher-dash",
+  "compatibility_date": "2025-09-01",
+  "assets": {
+    "directory": "./dist",
+    "not_found_handling": "single-page-application"
+  }
+}
