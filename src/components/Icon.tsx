@@ -1,4 +1,5 @@
 const PATHS: Record<string, JSX.Element> = {
+  home: <path d="M3 11l9-7 9 7M5 9.5V20h5v-6h4v6h5V9.5" />,
   play: <path d="M7 4l13 8-13 8z" fill="currentColor" stroke="none" />,
   pause: <path d="M6 4h4v16H6zM14 4h4v16h-4z" fill="currentColor" stroke="none" />,
   stepBack: <path d="M6 5h2v14H6zM20 5v14L9 12z" fill="currentColor" stroke="none" />,

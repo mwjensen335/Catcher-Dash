@@ -1,6 +1,7 @@
 import { NavLink, Navigate, Route, Routes } from 'react-router-dom';
 import { Icon } from './components/Icon';
 import { isDemoMode } from './lib/supabase';
+import Today from './pages/Today';
 import RepReview from './pages/RepReview';
 import ZoneGame from './pages/ZoneGame';
 import BlockingMap from './pages/BlockingMap';
@@ -8,6 +9,7 @@ import CatcherPage from './pages/CatcherPage';
 import ModelPlan from './pages/ModelPlan';
 
 const NAV = [
+  { to: '/today', label: 'Today', icon: 'home' },
   { to: '/review', label: 'Rep Review', icon: 'review' },
   { to: '/zone', label: 'Zone Game', icon: 'zone' },
   { to: '/blocking', label: 'Blocking Map', icon: 'block' },
@@ -38,12 +40,13 @@ export default function App() {
       </aside>
       <main>
         <Routes>
+          <Route path="/today" element={<Today />} />
           <Route path="/review" element={<RepReview />} />
           <Route path="/zone" element={<ZoneGame />} />
           <Route path="/blocking" element={<BlockingMap />} />
           <Route path="/catcher" element={<CatcherPage />} />
           <Route path="/model" element={<ModelPlan />} />
-          <Route path="*" element={<Navigate to="/review" replace />} />
+          <Route path="*" element={<Navigate to="/today" replace />} />
         </Routes>
       </main>
     </div>

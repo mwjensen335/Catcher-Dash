@@ -48,8 +48,8 @@ export default function CatcherPage() {
       <div className="ov-grid">
         <div className="tile"><div className="eyebrow">Pop time</div><div className="v num">{popHist[popHist.length - 1].toFixed(2)}<small>s</small></div><div className="sub">Last 8 weeks, from video</div><Spark data={popHist} lowerIsBetter /></div>
         <div className="tile"><div className="eyebrow">Exchange</div><div className="v num">{exHist[exHist.length - 1].toFixed(2)}<small>s</small></div><div className="sub">Last 8 weeks, from video</div><Spark data={exHist} lowerIsBetter /></div>
-        <div className="tile"><div className="eyebrow">Block rate</div><div className="v num">{Math.round(rate * 100)}<small>%</small></div><div className="sub">{blockReps.length} reps logged</div><Spark data={[0.74, 0.76, 0.75, 0.79, 0.8, 0.82, 0.81, rate]} /></div>
-        <div className="tile"><div className="eyebrow">Edge strike rate</div><div className="v num">{Math.round(edge * 100)}<small>%</small></div><div className="sub">{zs.edgeCount} edge pitches</div><Spark data={[0.41, 0.43, 0.42, 0.46, 0.45, 0.48, 0.47, edge]} /></div>
+        <div className="tile"><div className="eyebrow">Block rate</div><div className="v num">{Math.round(rate * 100)}<small>%</small></div><div className="sub">{blockReps.length} reps logged</div><Spark data={[0.61, 0.62, 0.64, 0.63, 0.66, 0.67, 0.69, rate]} /></div>
+        <div className="tile"><div className="eyebrow">Edge strike rate</div><div className="v num">{Math.round(edge * 100)}<small>%</small></div><div className="sub">{zs.edgeCount} edge pitches</div><Spark data={[0.28, 0.29, 0.31, 0.3, 0.32, 0.33, 0.34, edge]} /></div>
       </div>
       <div className="ov-cols">
         <div className="panel"><div className="panel-head"><h2>This week</h2><span className="eyebrow">Assigned</span></div>

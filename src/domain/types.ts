@@ -36,3 +36,32 @@ export type BlockOutcome = 'sm' | 'rb' | 'pb';
 export interface BlockRep { c: number; r: number; out: BlockOutcome }
 
 export const NOTE_LABEL: Record<NoteKind, string> = { good: 'Doing well', fix: 'Fix', note: 'Note', voice: 'Voice' };
+
+/* ---------- Lessons ---------- */
+/** One block of a lesson plan. `to` links the block to the tool used for it. */
+export interface PlanItem { min: number; area: Area; drill: string; detail: string; to?: string }
+export interface Homework { text: string; done: boolean }
+export interface Recap {
+  summary: string;
+  wins: string[];
+  workOns: string[];
+  clipIds: string[];
+  homework: Homework[];
+}
+export interface Lesson {
+  id: string;
+  catcher: string;
+  coach: string;
+  /** Local start time. */
+  start: Date;
+  minutes: number;
+  location: string;
+  focus: Area;
+  goal: string;
+  plan: PlanItem[];
+  /** Filled in by the coach after the lesson. */
+  recap?: Recap;
+}
+
+/** A number we track over time: where it was, where it is now. */
+export interface Progress { label: string; unit: string; from: number; to: number; since: string; lowerIsBetter?: boolean; digits: number }
